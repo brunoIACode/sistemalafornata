@@ -1,6 +1,5 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
-import { Star, Clock, Truck, Shield, ChefHat, Heart, Award, Users, ArrowRight, Phone, Flame, ShoppingCart } from 'lucide-react';
+import { Star, ChefHat, Heart, Award, ArrowRight, Phone, Flame, ShoppingCart } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
 const Home = () => {
@@ -94,7 +93,19 @@ const Home = () => {
               
               {/* Main Headline */}
               <div className="space-y-4">
-                <h1 className="text-5xl lg:text-7xl font-bold leading-tight">
+                {/* Mobile Version - Each word on separate line */}
+                <h1 className="block md:hidden text-5xl font-bold leading-tight">
+                  <span style={{ color: '#342419' }}>Sabores</span>
+                  <br />
+                  <span style={{ color: '#342419' }}>Artesanais</span>
+                  <br />
+                  <span style={{ color: '#F15027' }}>Com Tradição</span>
+                  <br />
+                  <span style={{ color: '#F15027' }}>Italiana</span>
+                </h1>
+                
+                {/* Desktop Version - Original layout */}
+                <h1 className="hidden md:block text-5xl lg:text-7xl font-bold leading-tight">
                   <span style={{ color: '#342419' }}>Sabores Artesanais</span>
                   <br />
                   <span style={{ color: '#F15027' }}>Com Tradição Italiana</span>
@@ -207,12 +218,12 @@ const Home = () => {
           {/* Grid de Cards */}
           <div className="grid md:grid-cols-3 gap-8 mb-12">
             {/* Nossa Paixão */}
-            <div className="bg-white rounded-2xl p-8 shadow-lg border-t-4" style={{ borderTopColor: '#F15027' }}>
+            <div className="bg-white rounded-2xl p-8 shadow-lg border-t-4 border-t-yellow-400">
               <div className="text-center mb-6">
-                <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: '#F15027' }}>
-                  <Heart className="w-8 h-8 text-white" />
+                <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Heart className="w-8 h-8" style={{ color: '#F15027' }} />
                 </div>
-                <h3 className="text-xl font-bold mb-2" style={{ color: '#F15027' }}>Nossa Paixão</h3>
+                <h3 className="text-xl font-bold mb-2" style={{ color: '#342419' }}>Nossa Paixão</h3>
                 <p className="text-gray-600 text-sm mb-4">
                   Criamos cada prato com dedicação e amor pela culinária italiana tradicional
                 </p>
@@ -228,7 +239,7 @@ const Home = () => {
                 <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <ChefHat className="w-8 h-8" style={{ color: '#F15027' }} />
                 </div>
-                <h3 className="text-xl font-bold mb-2" style={{ color: '#F15027' }}>Nosso Processo</h3>
+                <h3 className="text-xl font-bold mb-2" style={{ color: '#342419' }}>Nosso Processo</h3>
                 <p className="text-gray-600 text-sm mb-4">
                   Ingredientes selecionados e técnicas tradicionais para pratos perfeitos
                 </p>

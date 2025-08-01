@@ -6,11 +6,13 @@ import { useCart } from '../context/CartContext';
 const Cart = () => {
   const { state, dispatch } = useCart();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [showThankYouModal, setShowThankYouModal] = useState(false);
   const [customerInfo, setCustomerInfo] = useState({
     name: '',
     phone: '',
     address: '',
-    paymentMethod: 'money'
+    paymentMethod: 'money',
+    observations: ''
   });
 
   const updateQuantity = (id: number, quantity: number) => {
@@ -31,22 +33,103 @@ const Cart = () => {
   const handleCheckout = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Simular processamento do pedido
-    alert(`Pedido realizado com sucesso! 
+    // Construir mensagem para WhatsApp
+    const whatsappMessage = buildWhatsAppMessage();
     
-Total: R$ ${state.total.toFixed(2)}
-Tempo estimado: 30-45 minutos
+    // Enviar para WhatsApp
+    const whatsappNumber = "558695178367";
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
     
-Obrigado pela preferência!`);
+    // Mostrar notificação de sucesso
+    dispatch({ 
+      type: 'SHOW_NOTIFICATION', 
+      payload: {
+        id: Date.now().toString(),
+        message: 'Pedido enviado! Redirecionando para WhatsApp...',
+        type: 'success'
+      }
+    });
     
+    // Aguardar um pouco antes de abrir o WhatsApp para o usuário ver a notificação
+    setTimeout(() => {
+      window.open(whatsappUrl, '_blank');
+      // Mostrar mensagem personalizada após enviar
+      showCustomerMessage();
+    }, 1000);
+    
+    // Limpar carrinho e formulário
     dispatch({ type: 'CLEAR_CART' });
     setIsCheckingOut(false);
     setCustomerInfo({
       name: '',
       phone: '',
       address: '',
-      paymentMethod: 'money'
+      paymentMethod: 'money',
+      observations: ''
     });
+  };
+
+  const buildWhatsAppMessage = () => {
+    const deliveryFee = state.total >= 50 ? 0 : 8.90;
+    const finalTotal = state.total + deliveryFee;
+    
+    let message = `*NOVO PEDIDO - LA FORNATA*\n\n`;
+    
+    // Dados do cliente
+    message += `*DADOS DO CLIENTE:*\n`;
+    message += `Nome: ${customerInfo.name}\n`;
+    message += `Telefone: ${customerInfo.phone}\n`;
+    message += `Endereco: ${customerInfo.address}\n\n`;
+    
+    // Itens do pedido
+    message += `*ITENS DO PEDIDO:*\n`;
+    state.items.forEach((item) => {
+      message += `- ${item.quantity}x ${item.name}\n`;
+      message += `  R$ ${item.price.toFixed(2)} cada = R$ ${(item.price * item.quantity).toFixed(2)}\n\n`;
+    });
+    
+    // Valores
+    message += `*VALORES:*\n`;
+    message += `Subtotal: R$ ${state.total.toFixed(2)}\n`;
+    message += `Taxa de Entrega: ${deliveryFee === 0 ? 'GRATIS' : `R$ ${deliveryFee.toFixed(2)}`}\n`;
+    message += `*Total: R$ ${finalTotal.toFixed(2)}*\n\n`;
+    
+    // Forma de pagamento
+    const paymentMethods = {
+      money: 'Dinheiro',
+      credit: 'Cartao de Credito',
+      debit: 'Cartao de Debito',
+      pix: 'PIX'
+    };
+    message += `*Forma de Pagamento:* ${paymentMethods[customerInfo.paymentMethod as keyof typeof paymentMethods]}\n\n`;
+    
+    // Observações
+    if (customerInfo.observations) {
+      message += `*OBSERVACOES:*\n${customerInfo.observations}\n\n`;
+    }
+    
+    // Informações adicionais
+    message += `*Tempo estimado:* 30-45 minutos\n`;
+    message += `*Data/Hora:* ${new Date().toLocaleString('pt-BR')}\n\n`;
+    message += `Pedido enviado automaticamente pelo site!`;
+    
+    return message;
+  };
+
+  const showCustomerMessage = () => {
+    setTimeout(() => {
+      setShowThankYouModal(true);
+    }, 2000);
+  };
+
+  const getPaymentMethodName = () => {
+    const paymentMethods = {
+      money: 'Dinheiro',
+      credit: 'Cartão de Crédito', 
+      debit: 'Cartão de Débito',
+      pix: 'PIX'
+    };
+    return paymentMethods[customerInfo.paymentMethod as keyof typeof paymentMethods];
   };
 
   const deliveryFee = state.total >= 50 ? 0 : 8.90;
@@ -146,6 +229,24 @@ Obrigado pela preferência!`);
                 </div>
 
                 <div>
+                  <label htmlFor="observations" className="block text-sm font-medium text-gray-700 mb-2">
+                    Observações do Pedido
+                  </label>
+                  <textarea
+                    id="observations"
+                    name="observations"
+                    value={customerInfo.observations}
+                    onChange={handleInputChange}
+                    rows={3}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
+                    placeholder="Ex: Sem cebola na lasanha, molho à parte, ponto da carne, etc."
+                  ></textarea>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Informe aqui qualquer observação especial sobre seu pedido
+                  </p>
+                </div>
+
+                <div>
                   <label htmlFor="paymentMethod" className="block text-sm font-medium text-gray-700 mb-2">
                     Forma de Pagamento *
                   </label>
@@ -233,7 +334,7 @@ Obrigado pela preferência!`);
 
   return (
     <div className="min-h-screen bg-gray-50 pt-8">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2" style={{ color: '#342419' }}>Seu Carrinho</h1>
           <p style={{ color: '#666666' }}>Revise seus itens antes de finalizar o pedido</p>
@@ -346,6 +447,74 @@ Obrigado pela preferência!`);
           </div>
         </div>
       </div>
+
+      {/* Modal de Agradecimento */}
+      {showThankYouModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 text-center">
+            <div className="mb-6">
+              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="text-green-600 text-4xl font-bold">LA</div>
+              </div>
+              <h2 className="text-2xl font-bold mb-2" style={{ color: '#342419' }}>
+                La Fornata
+              </h2>
+              <p className="text-lg font-semibold" style={{ color: '#F15027' }}>
+                Obrigado pelo seu pedido!
+              </p>
+            </div>
+
+            <div className="text-left space-y-3 mb-6">
+              <p className="text-gray-700">
+                Olá <span className="font-semibold">{customerInfo.name}</span>! 
+              </p>
+              <p className="text-gray-700">
+                Recebemos seu pedido com sucesso e já estamos preparando tudo com muito carinho para você.
+              </p>
+              
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h4 className="font-semibold mb-2" style={{ color: '#342419' }}>📋 Resumo do seu pedido:</h4>
+                <div className="space-y-1 text-sm">
+                  <div className="flex justify-between">
+                    <span>Total:</span>
+                    <span className="font-semibold">R$ {(state.total + (state.total >= 50 ? 0 : 8.90)).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Pagamento:</span>
+                    <span>{getPaymentMethodName()}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="text-sm text-gray-600">
+                <p>⏰ <strong>Tempo estimado:</strong> 30-45 minutos</p>
+                <p>📍 <strong>Endereço:</strong> {customerInfo.address}</p>
+              </div>
+
+              <p className="text-gray-700 text-sm">
+                Em breve entraremos em contato pelo WhatsApp para confirmar os detalhes.
+              </p>
+            </div>
+
+            <div className="border-t pt-4">
+              <p className="text-sm font-medium" style={{ color: '#F15027' }}>
+                🙏 Agradecemos a preferência!
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                La Fornata - Sabores que aquecem o coração
+              </p>
+            </div>
+
+            <button
+              onClick={() => setShowThankYouModal(false)}
+              className="mt-6 w-full text-white py-3 rounded-lg font-semibold hover:opacity-90 transition-colors"
+              style={{ backgroundColor: '#F15027' }}
+            >
+              Fechar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Phone, Mail, MapPin, Clock, Facebook, Instagram, Twitter, Flame } from 'lucide-react';
+import { Phone, Mail, MapPin, Clock, Instagram, Flame } from 'lucide-react';
 
 const Footer = () => {
   return (
@@ -13,7 +13,6 @@ const Footer = () => {
               <Flame className="w-8 h-8 mr-3" style={{ color: '#F15027' }} />
               <div>
                 <h1 className="text-2xl font-bold">La Fornata</h1>
-                <p className="text-sm font-semibold" style={{ color: '#F15027' }}>Culinária Italiana</p>
               </div>
             </div>
             <p className="text-gray-400 mb-6 leading-relaxed">
@@ -22,13 +21,7 @@ const Footer = () => {
             </p>
             <div className="flex space-x-4">
               <a href="#" className="p-2 rounded-full hover:opacity-80 transition-colors" style={{ backgroundColor: '#F15027' }}>
-                <Facebook className="w-5 h-5" />
-              </a>
-              <a href="#" className="p-2 rounded-full hover:opacity-80 transition-colors" style={{ backgroundColor: '#F15027' }}>
                 <Instagram className="w-5 h-5" />
-              </a>
-              <a href="#" className="p-2 rounded-full hover:opacity-80 transition-colors" style={{ backgroundColor: '#F15027' }}>
-                <Twitter className="w-5 h-5" />
               </a>
             </div>
           </div>
@@ -57,16 +50,7 @@ const Footer = () => {
                   Contato
                 </Link>
               </li>
-              <li>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                  Política de Privacidade
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                  Termos de Uso
-                </a>
-              </li>
+
             </ul>
           </div>
 
@@ -140,20 +124,12 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Bottom Bar */}
+                {/* Bottom Bar */}
         <div className="border-t border-gray-800 mt-12 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center">
+          <div className="flex justify-center">
             <p className="text-gray-400 text-sm">
               © 2025 La Fornata. Todos os direitos reservados.
             </p>
-            <div className="flex items-center space-x-6 mt-4 md:mt-0">
-              <p className="text-gray-400 text-sm">Formas de Pagamento:</p>
-              <div className="flex space-x-2">
-                <div className="bg-gray-800 px-3 py-1 rounded text-xs">VISA</div>
-                <div className="bg-gray-800 px-3 py-1 rounded text-xs">MASTER</div>
-                <div className="bg-gray-800 px-3 py-1 rounded text-xs">PIX</div>
-              </div>
-            </div>
           </div>
         </div>
       </div>

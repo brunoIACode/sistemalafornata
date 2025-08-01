@@ -10,16 +10,26 @@ export interface CartItem {
   extras?: string[];
 }
 
+export interface Notification {
+  id: string;
+  message: string;
+  type: 'success' | 'error' | 'info';
+  productName?: string;
+}
+
 interface CartState {
   items: CartItem[];
   total: number;
+  notification: Notification | null;
 }
 
 type CartAction = 
   | { type: 'ADD_ITEM'; payload: Omit<CartItem, 'quantity'> }
   | { type: 'REMOVE_ITEM'; payload: number }
   | { type: 'UPDATE_QUANTITY'; payload: { id: number; quantity: number } }
-  | { type: 'CLEAR_CART' };
+  | { type: 'CLEAR_CART' }
+  | { type: 'SHOW_NOTIFICATION'; payload: Notification }
+  | { type: 'HIDE_NOTIFICATION' };
 
 const CartContext = createContext<{
   state: CartState;
@@ -39,14 +49,26 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
         );
         return {
           items: updatedItems,
-          total: updatedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+          total: updatedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+          notification: {
+            id: Date.now().toString(),
+            message: `${action.payload.name} foi adicionado ao carrinho!`,
+            type: 'success',
+            productName: action.payload.name
+          }
         };
       }
       
       const newItems = [...state.items, { ...action.payload, quantity: 1 }];
       return {
         items: newItems,
-        total: newItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+        total: newItems.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+        notification: {
+          id: Date.now().toString(),
+          message: `${action.payload.name} foi adicionado ao carrinho!`,
+          type: 'success',
+          productName: action.payload.name
+        }
       };
     }
     
@@ -54,7 +76,8 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
       const newItems = state.items.filter(item => item.id !== action.payload);
       return {
         items: newItems,
-        total: newItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+        total: newItems.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+        notification: state.notification
       };
     }
     
@@ -67,12 +90,25 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
       
       return {
         items: updatedItems,
-        total: updatedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+        total: updatedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+        notification: state.notification
       };
     }
     
     case 'CLEAR_CART':
-      return { items: [], total: 0 };
+      return { items: [], total: 0, notification: null };
+    
+    case 'SHOW_NOTIFICATION':
+      return {
+        ...state,
+        notification: action.payload
+      };
+    
+    case 'HIDE_NOTIFICATION':
+      return {
+        ...state,
+        notification: null
+      };
     
     default:
       return state;
@@ -80,7 +116,7 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
 };
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
-  const [state, dispatch] = useReducer(cartReducer, { items: [], total: 0 });
+  const [state, dispatch] = useReducer(cartReducer, { items: [], total: 0, notification: null });
   
   return (
     <CartContext.Provider value={{ state, dispatch }}>
